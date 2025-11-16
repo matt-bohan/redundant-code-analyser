@@ -39,6 +39,14 @@ A Roslyn code analyzer that identifies potentially redundant code across the ent
 
 The analyzer automatically runs during compilation and reports warnings for potentially unused code. The diagnostic ID is `RCA001`.
 
+## Testing
+
+Run the analyzer and unit tests with:
+
+```bash
+dotnet test
+```
+
 ### Example
 
 ```csharp

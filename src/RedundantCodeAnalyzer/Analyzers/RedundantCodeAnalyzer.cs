@@ -85,6 +85,16 @@ namespace RedundantCodeAnalyzer.Analyzers
                 return;
             }
 
+            if (symbol is IMethodSymbol methodSymbol &&
+                (methodSymbol.MethodKind == MethodKind.PropertyGet ||
+                 methodSymbol.MethodKind == MethodKind.PropertySet ||
+                 methodSymbol.MethodKind == MethodKind.EventAdd ||
+                 methodSymbol.MethodKind == MethodKind.EventRemove ||
+                 methodSymbol.MethodKind == MethodKind.EventRaise))
+            {
+                return;
+            }
+
             // Get the compilation to analyze the entire solution
             var compilation = context.Compilation;
 
