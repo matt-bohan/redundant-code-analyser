@@ -88,6 +88,43 @@ namespace RedundantCodeAnalyzer.Analyzers
             base.VisitInvocationExpression(node);
         }
 
+        public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
+        {
+            // Check if we're assigning to the target symbol
+            // This is important for detecting property setter usage
+            var leftSymbol = _semanticModel.GetSymbolInfo(node.Left);
+            
+            // If the target symbol is a property, check if this assignment uses it
+            if (_targetSymbol is IPropertySymbol targetProperty)
+            {
+                if (leftSymbol.Symbol is IPropertySymbol propertySymbol &&
+                    SymbolEqualityComparer.Default.Equals(propertySymbol, targetProperty))
+                {
+                    FoundReference = true;
+                    return;
+                }
+            }
+            // If the target symbol is a property setter method (set accessor)
+            else if (_targetSymbol is IMethodSymbol targetMethod && targetMethod.MethodKind == MethodKind.PropertySet)
+            {
+                if (leftSymbol.Symbol is IPropertySymbol propertySymbol &&
+                    propertySymbol.SetMethod != null &&
+                    SymbolEqualityComparer.Default.Equals(propertySymbol.SetMethod, targetMethod))
+                {
+                    FoundReference = true;
+                    return;
+                }
+            }
+            // Check if we're assigning to a field
+            else if (IsTargetSymbol(leftSymbol))
+            {
+                FoundReference = true;
+                return;
+            }
+
+            base.VisitAssignmentExpression(node);
+        }
+
         private bool IsDeclarationLocation(SyntaxNode node)
         {
             var nodeLocation = node.GetLocation();

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -47,13 +48,13 @@ namespace RedundantCodeAnalyzer.Analyzers
         public override void Initialize(AnalysisContext context)
         {
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-            context.EnableConcurrentExecution();
+            context.EnableConcurrentExecution(); // Re-enabled concurrent execution
 
             // Use CompilationStartAction for better performance and caching
             context.RegisterCompilationStartAction(compilationStartContext =>
             {
-                // Cache semantic models for performance
-                var semanticModelCache = new Dictionary<SyntaxTree, SemanticModel>();
+                // Cache semantic models for performance - use ConcurrentDictionary for thread safety
+                var semanticModelCache = new ConcurrentDictionary<SyntaxTree, SemanticModel>();
 
                 compilationStartContext.RegisterSymbolAction(symbolContext =>
                 {
@@ -67,7 +68,7 @@ namespace RedundantCodeAnalyzer.Analyzers
             });
         }
 
-        private static void AnalyzeSymbol(SymbolAnalysisContext context, Dictionary<SyntaxTree, SemanticModel> semanticModelCache)
+        private static void AnalyzeSymbol(SymbolAnalysisContext context, ConcurrentDictionary<SyntaxTree, SemanticModel> semanticModelCache)
         {
             var symbol = context.Symbol;
 

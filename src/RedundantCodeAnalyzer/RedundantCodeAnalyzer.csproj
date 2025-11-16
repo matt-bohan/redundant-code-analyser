@@ -26,7 +26,7 @@
 
   <PropertyGroup>
     <PackageId>MBSD.Analysers.RedundantCode</PackageId>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <Authors>Matt Bohan</Authors>
     <Description>Analyzes code for redundancy across the entire solution.</Description>
     <PackageTags>analyzer;roslyn;redundant;code</PackageTags>

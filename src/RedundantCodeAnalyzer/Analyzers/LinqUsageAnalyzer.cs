@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -14,9 +15,9 @@ namespace RedundantCodeAnalyzer.Analyzers
     {
         private readonly ISymbol _targetSymbol;
         private readonly Compilation _compilation;
-        private readonly Dictionary<SyntaxTree, SemanticModel> _semanticModelCache;
+        private readonly ConcurrentDictionary<SyntaxTree, SemanticModel> _semanticModelCache;
 
-        public LinqUsageAnalyzer(ISymbol targetSymbol, Compilation compilation, Dictionary<SyntaxTree, SemanticModel> semanticModelCache)
+        public LinqUsageAnalyzer(ISymbol targetSymbol, Compilation compilation, ConcurrentDictionary<SyntaxTree, SemanticModel> semanticModelCache)
         {
             _targetSymbol = targetSymbol;
             _compilation = compilation;
@@ -27,12 +28,9 @@ namespace RedundantCodeAnalyzer.Analyzers
         {
             foreach (var syntaxTree in _compilation.SyntaxTrees)
             {
-                // Use cached semantic model
-                if (!_semanticModelCache.TryGetValue(syntaxTree, out var semanticModel))
-                {
-                    semanticModel = _compilation.GetSemanticModel(syntaxTree);
-                    _semanticModelCache[syntaxTree] = semanticModel;
-                }
+                // Use cached semantic model - thread-safe access
+                var semanticModel = _semanticModelCache.GetOrAdd(syntaxTree,
+                    tree => _compilation.GetSemanticModel(tree));
 
                 var root = syntaxTree.GetRoot();
                 var visitor = new LinqUsageVisitor(_targetSymbol, semanticModel);
