@@ -4,16 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <IncludeBuildOutput>true</IncludeBuildOutput>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <BuildOutputTargetFolder>lib\netstandard2.0</BuildOutputTargetFolder>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +22,7 @@
 
   <PropertyGroup>
     <PackageId>MBSD.Analysers.RedundantCode</PackageId>
-    <Version>1.0.6</Version>
+    <Version>1.0.9</Version>
     <Authors>Matt Bohan</Authors>
     <Description>Analyzes code for redundancy across the entire solution.</Description>
     <PackageTags>analyzer;roslyn;redundant;code</PackageTags>
