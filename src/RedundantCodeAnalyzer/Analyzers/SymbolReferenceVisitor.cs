@@ -23,6 +23,13 @@ namespace RedundantCodeAnalyzer.Analyzers
 
         public override void VisitIdentifierName(IdentifierNameSyntax node)
         {
+            // Skip if this is the declaration location itself
+            if (IsDeclarationLocation(node))
+            {
+                base.VisitIdentifierName(node);
+                return;
+            }
+
             var symbolInfo = _semanticModel.GetSymbolInfo(node);
             if (IsTargetSymbol(symbolInfo))
             {
@@ -79,6 +86,34 @@ namespace RedundantCodeAnalyzer.Analyzers
             }
 
             base.VisitInvocationExpression(node);
+        }
+
+        private bool IsDeclarationLocation(SyntaxNode node)
+        {
+            var nodeLocation = node.GetLocation();
+            if (nodeLocation == null || !nodeLocation.IsInSource)
+            {
+                return false;
+            }
+
+            // Check if this node is at one of the declaration locations of the target symbol
+            foreach (var declarationLocation in _targetSymbol.Locations)
+            {
+                if (declarationLocation.IsInSource && 
+                    declarationLocation.SourceTree == nodeLocation.SourceTree)
+                {
+                    var declarationSpan = declarationLocation.SourceSpan;
+                    var nodeSpan = nodeLocation.SourceSpan;
+                    
+                    // If the node's span overlaps with or is within the declaration span, it's likely the declaration
+                    if (nodeSpan.Start >= declarationSpan.Start && nodeSpan.End <= declarationSpan.End)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private bool IsTargetSymbol(SymbolInfo symbolInfo)

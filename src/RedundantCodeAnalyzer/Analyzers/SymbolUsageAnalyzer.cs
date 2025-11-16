@@ -74,12 +74,6 @@ namespace RedundantCodeAnalyzer.Analyzers
         {
             foreach (var syntaxTree in _compilation.SyntaxTrees)
             {
-                // Skip the file where the symbol is declared
-                if (IsSymbolDeclaredInTree(syntaxTree))
-                {
-                    continue;
-                }
-
                 // Use cached semantic model for performance
                 if (!_semanticModelCache.TryGetValue(syntaxTree, out var semanticModel))
                 {
@@ -88,12 +82,57 @@ namespace RedundantCodeAnalyzer.Analyzers
                 }
 
                 var root = syntaxTree.GetRoot();
-                var visitor = new SymbolReferenceVisitor(_targetSymbol, semanticModel);
-                visitor.Visit(root);
+                var isDeclaredInThisTree = IsSymbolDeclaredInTree(syntaxTree);
 
-                if (visitor.FoundReference)
+                // For files where the symbol is declared, we need to check for usage in:
+                // - All methods (including regular methods, not just overridden ones)
+                // - Lambdas
+                // - Local functions
+                // - Constructors
+                // - Accessors
+                // - Field initializers
+                // This is because these contexts might be the only place a private field is used
+                if (isDeclaredInThisTree)
                 {
-                    return true;
+                    // First check for usage in lambdas, local functions, methods, constructors, etc.
+                    var lambdaLocalFunctionVisitor = new LambdaLocalFunctionOverrideVisitor(_targetSymbol, semanticModel, _compilation);
+                    lambdaLocalFunctionVisitor.Visit(root);
+
+                    if (lambdaLocalFunctionVisitor.FoundUsage)
+                    {
+                        return true;
+                    }
+
+                    // Also check for direct references (but exclude the declaration itself)
+                    // This catches any other usage patterns we might have missed
+                    var directVisitor = new SymbolReferenceVisitor(_targetSymbol, semanticModel);
+                    directVisitor.Visit(root);
+
+                    if (directVisitor.FoundReference)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    // For other files, check for all direct references
+                    var visitor = new SymbolReferenceVisitor(_targetSymbol, semanticModel);
+                    visitor.Visit(root);
+
+                    if (visitor.FoundReference)
+                    {
+                        return true;
+                    }
+
+                    // Also check for usage in lambdas, local functions, and overrides in other files
+                    // This catches cases where a field might be used in a lambda in a different file
+                    var lambdaVisitor = new LambdaLocalFunctionOverrideVisitor(_targetSymbol, semanticModel, _compilation);
+                    lambdaVisitor.Visit(root);
+
+                    if (lambdaVisitor.FoundUsage)
+                    {
+                        return true;
+                    }
                 }
             }
 
