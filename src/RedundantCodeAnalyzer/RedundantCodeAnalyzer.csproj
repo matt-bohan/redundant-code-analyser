@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -26,7 +26,7 @@
 
   <PropertyGroup>
     <PackageId>MBSD.Analysers.RedundantCode</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.4</Version>
     <Authors>Matt Bohan</Authors>
     <Description>Analyzes code for redundancy across the entire solution.</Description>
     <PackageTags>analyzer;roslyn;redundant;code</PackageTags>
