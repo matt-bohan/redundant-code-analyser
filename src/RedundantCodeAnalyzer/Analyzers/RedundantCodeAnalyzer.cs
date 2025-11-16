@@ -37,7 +37,9 @@ namespace RedundantCodeAnalyzer.Analyzers
             Category,
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: Description);
+            description: Description,
+            helpLinkUri: null,
+            customTags: new[] {  WellKnownDiagnosticTags.Unnecessary ,"AnalyzerReleaseTracking"  });  
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
             ImmutableArray.Create(Rule);
