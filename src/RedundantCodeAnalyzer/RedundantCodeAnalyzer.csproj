@@ -26,7 +26,7 @@
 
   <PropertyGroup>
     <PackageId>MBSD.Analysers.RedundantCode</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>Matt Bohan</Authors>
     <Description>Analyzes code for redundancy across the entire solution.</Description>
     <PackageTags>analyzer;roslyn;redundant;code</PackageTags>
@@ -37,6 +37,9 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs/" />
   </ItemGroup>
 
 </Project>
